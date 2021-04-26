@@ -3,6 +3,10 @@ import requests
 import tkinter as tk
 from functools import partial
 from twilio.rest import Client
+from api import account_sid, auth_token
+import threading
+import random
+import time
 
 
 class gui_stuff(tk.Frame):
@@ -17,15 +21,15 @@ class gui_stuff(tk.Frame):
 
     def init_ui(self):
         self.buttons["Send"] = tk.Button(self, borderwidth=10, command=partial(self.actions, "Send"))
-        self.buttons["Send"].grid(row=1, column=0, padx=20, pady=20)
+        self.buttons["Send"].grid(row=2, column=0, padx=20, pady=20)
         self.buttons["Send"]["text"] = "Send Cat Facts"
 
         self.buttons["Reset"] = tk.Button(self, borderwidth=10, command=partial(self.actions, "Reset"))
-        self.buttons["Reset"].grid(row=1, column=2, padx=20, pady=20)
+        self.buttons["Reset"].grid(row=2, column=2, padx=20, pady=20)
         self.buttons["Reset"]["text"] = "Reset Cat Facts"
 
-        self.buttons["I'm Feeling Lucky"] = tk.Button(self, borderwidth=10, command=partial(self.actions, "Sike this don't do shit"))
-        self.buttons["I'm Feeling Lucky"].grid(row=1, column=1, padx=20, pady=20)
+        self.buttons["I'm Feeling Lucky"] = tk.Button(self, borderwidth=10, command=partial(self.actions, "I'm Feeling Lucky"))
+        self.buttons["I'm Feeling Lucky"].grid(row=2, column=1, padx=20, pady=20)
         self.buttons["I'm Feeling Lucky"]["text"] = "I'm Feeling Lucky"
 
         self.fields["Digis"] = tk.Text(self, height=2, width=40)
@@ -33,21 +37,46 @@ class gui_stuff(tk.Frame):
 
         self.labels["Digis"] = tk.Label(self, borderwidth=10)
         self.labels["Digis"].grid(row=0, column=0, padx=20, pady=20)
-        self.labels["Digis"]["text"] = "This for the Digis"
+        self.labels["Digis"]["text"] = "This for the Digis:"
+
+        self.fields["How Many"] = tk.Text(self, height=2, width=40)
+        self.fields["How Many"].grid(row=1, column=1, columnspan=3, padx=20, pady=20)
+
+        self.labels["How Many"] = tk.Label(self, borderwidth=10)
+        self.labels["How Many"].grid(row=1, column=0, padx=20, pady=20)
+        self.labels["How Many"]["text"] = "How Many you going to send:"
 
     def actions(self, action):
         return_variable = action
+        counter = 1
         if(action == "Send"):
-            print(self.fields["Digis"].get("1.0", tk.END))
-            self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
+            sms_loop = threading.Thread(name='threaded_sms_loop', target=self.threaded_sms_loop)
+            sms_loop.start()
+
         if (action == "Reset"):
             print(self.get_cat_facts())
+
         if (action == "I'm Feeling Lucky"):
-            print(self.fields["I'inm Feeling Lucky"].get("1.0", tk.END))
+            print(self.fields["Digis"].get("1.0", tk.END))
+            #print(self.fields["I'm Feeling Lucky"].get("1.0", tk.END))
+            self.create_new_window()
+
+    def threaded_sms_loop(self):
+        if (self.fields["How Many"].get("1.0", tk.END) == ""):
+            counter = 1
+            print(self.fields["Digis"].get("1.0", tk.END))
+            self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
+        else:
+            counter = int(self.fields["How Many"].get("1.0", tk.END))
+            for x in range(0, counter):
+                try:
+                    time.sleep(random.randint(0,5))
+                    print(self.fields["Digis"].get("1.0", tk.END))
+                    self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
+                except Exception as e:
+                    print(e)
 
     def create_sms(self, text, phone_number):
-        account_sid = "ACbd13656fb018e71092b5c0eb82e6a371"
-        auth_token = "dea57a59754bea5bd4f758fce3cbb24d"
         client = Client(account_sid, auth_token)
 
         message = client.messages.create(
@@ -61,8 +90,13 @@ class gui_stuff(tk.Frame):
     def get_cat_facts(self):
         return requests.get(url="https://catfact.ninja/fact").json()["fact"]
 
+    def create_new_window(self):
+        newWindow = tk.Toplevel(self.master)
+        newWindow.title("Get Fukt")
+        newWindow.geometry('600x200')
+        tk.Label(newWindow,text="Sike this shit don't work!").pack()
 
 root = tk.Tk(className="Cat Facts")
-root.geometry("525x525")
+root.geometry("600x600")
 app = gui_stuff(master=root)
 app.mainloop()
