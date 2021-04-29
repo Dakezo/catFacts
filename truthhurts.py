@@ -50,11 +50,16 @@ class gui_stuff(tk.Frame):
         return_variable = action
         counter = 1
         if(action == "Send"):
-            sms_loop = threading.Thread(name='threaded_sms_loop', target=self.threaded_sms_loop)
-            sms_loop.start()
+            if(self.fields["Digis"].get("1.0", tk.END) ==""):
+                sms_loop = threading.Thread(name='threaded_sms_loop', target=self.threaded_sms_loop)
+                sms_loop.start()
+            else:
+                print("Shits Broke. Open a ticket with Support.")
 
         if (action == "Reset"):
-            print(self.get_cat_facts())
+            self.fields["Digis"].delete("1.0", tk.END)
+            self.fields["How Many"].delete("1.0", tk.END)
+
 
         if (action == "I'm Feeling Lucky"):
             print(self.fields["Digis"].get("1.0", tk.END))
