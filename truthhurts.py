@@ -1,4 +1,6 @@
 import os
+import traceback
+
 import requests
 import tkinter as tk
 from functools import partial
@@ -50,9 +52,14 @@ class gui_stuff(tk.Frame):
         return_variable = action
         counter = 1
         if(action == "Send"):
-            if(self.fields["Digis"].get("1.0", tk.END) ==""):
-                sms_loop = threading.Thread(name='threaded_sms_loop', target=self.threaded_sms_loop)
-                sms_loop.start()
+            if(self.fields["Digis"].get("1.0", tk.END) !='\n'):
+                try:
+                    sms_loop = threading.Thread(name='threaded_sms_loop', target=self.threaded_sms_loop)
+                    sms_loop.start()
+                except Exception as e:
+                    print("Shits Broke. Open a ticket with Support.")
+                    print(traceback.format_exc())
+                    print(e)
             else:
                 print("Shits Broke. Open a ticket with Support.")
 
@@ -60,17 +67,21 @@ class gui_stuff(tk.Frame):
             self.fields["Digis"].delete("1.0", tk.END)
             self.fields["How Many"].delete("1.0", tk.END)
 
-
         if (action == "I'm Feeling Lucky"):
             print(self.fields["Digis"].get("1.0", tk.END))
             #print(self.fields["I'm Feeling Lucky"].get("1.0", tk.END))
             self.create_new_window()
 
     def threaded_sms_loop(self):
-        if (self.fields["How Many"].get("1.0", tk.END) == ""):
+        if (self.fields["How Many"].get("1.0", tk.END) == '\n'):
             counter = 1
             print(self.fields["Digis"].get("1.0", tk.END))
-            self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
+            try:
+                self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
+            except Exception as e:
+                print("Shits Broke. Open a ticket with Support.")
+                print(traceback.format_exc())
+                print(e)
         else:
             counter = int(self.fields["How Many"].get("1.0", tk.END))
             for x in range(0, counter):
