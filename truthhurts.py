@@ -86,7 +86,7 @@ class gui_stuff(tk.Frame):
             counter = int(self.fields["How Many"].get("1.0", tk.END))
             for x in range(0, counter):
                 try:
-                    time.sleep(random.randint(0,5))
+                    time.sleep(random.randint(0,60))
                     print(self.fields["Digis"].get("1.0", tk.END))
                     self.create_sms(self.get_cat_facts(), str(self.fields["Digis"].get("1.0", tk.END)))
                 except Exception as e:
@@ -94,7 +94,6 @@ class gui_stuff(tk.Frame):
 
     def create_sms(self, text, phone_number):
         client = Client(account_sid, auth_token)
-
         message = client.messages.create(
             body= text,
             from_='+16099007521',
